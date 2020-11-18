@@ -1,11 +1,7 @@
 package commons
 
-type Request struct {
-	A int
-	B int
-	C int
-}
-
-type Response struct {
-	Result []float64
+type TempPacket struct {
+	Operation string
+	Params    []interface{}
+	Reply     interface{}
 }

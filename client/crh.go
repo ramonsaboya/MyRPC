@@ -1,8 +1,8 @@
 package client
 
 import (
+	"fmt"
 	"net"
-	"unsafe"
 
 	"github.com/ramonsaboya/myrpc/commons"
 )
@@ -18,11 +18,10 @@ type CRH struct {
 	bufferSize int
 }
 
-func newCRH(protocol commons.Protocol, address string, bufferSize int) (*CRH, error) {
+func NewCRH(protocol commons.Protocol, host string, port int) (*CRH, error) {
 	return &CRH{
-		address:    address,
-		protocol:   protocol,
-		bufferSize: bufferSize,
+		address:  fmt.Sprintf("%s:%d", host, port),
+		protocol: protocol,
 	}, nil
 }
 
@@ -35,7 +34,7 @@ func createConnection(protocol commons.Protocol, address string) (*net.Conn, err
 }
 
 func (crh *CRH) getConnection() (*net.Conn, error) {
-	conn, ok := connCache[crh.address]
+	_, ok := connCache[crh.address]
 	if !ok {
 		conn, err := createConnection(crh.protocol, crh.address)
 		if err != nil {
@@ -44,7 +43,7 @@ func (crh *CRH) getConnection() (*net.Conn, error) {
 		connCache[crh.address] = conn
 	}
 
-	return conn, nil
+	return connCache[crh.address], nil
 }
 
 func (crh *CRH) SendReceive(data []byte) ([]byte, error) {
@@ -55,11 +54,11 @@ func (crh *CRH) SendReceive(data []byte) ([]byte, error) {
 
 	(*conn).Write(data)
 
-	buf := make([]byte, unsafe.Sizeof(crh.bufferSize))
-	_, err = (*conn).Read(buf)
+	buf := make([]byte, 1024)
+	n, err := (*conn).Read(buf)
 	if err != nil {
 		return nil, err
 	}
 
-	return buf, nil
+	return buf[:n], nil
 }

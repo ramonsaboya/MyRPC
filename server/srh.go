@@ -2,8 +2,8 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"net"
-	"unsafe"
 
 	"github.com/ramonsaboya/myrpc/commons"
 )
@@ -12,8 +12,7 @@ type SRH struct {
 	tcpListener *net.Listener
 	udpConn     *net.UDPConn
 
-	protocol   commons.Protocol
-	bufferSize int
+	protocol commons.Protocol
 
 	replyToTCP *net.Conn
 	replyToUDP *net.UDPAddr
@@ -22,7 +21,8 @@ type SRH struct {
 var errUnknownProtocolError error = errors.New("Unknown protocol")
 var errReplyToNotSet error = errors.New("reply-to field is not set")
 
-func newSRH(protocol commons.Protocol, address string, bufferSize int) (*SRH, error) {
+func NewSRH(protocol commons.Protocol, host string, port int) (*SRH, error) {
+	address := fmt.Sprintf("%s:%d", host, port)
 	if protocol == commons.TCP {
 		listener, err := net.Listen(string(protocol), address)
 		if err != nil {
@@ -42,16 +42,15 @@ func newSRH(protocol commons.Protocol, address string, bufferSize int) (*SRH, er
 			return nil, err
 		}
 		return &SRH{
-			udpConn:    udpConn,
-			protocol:   protocol,
-			bufferSize: bufferSize,
+			udpConn:  udpConn,
+			protocol: protocol,
 		}, nil
 	}
 	return nil, errUnknownProtocolError
 }
 
 func (srh *SRH) Receive() ([]byte, error) {
-	data := make([]byte, unsafe.Sizeof(srh.bufferSize))
+	data := make([]byte, 1024)
 	if srh.protocol == commons.TCP {
 		return srh.receiveTCP(data)
 	} else if srh.protocol == commons.UDP {
@@ -75,11 +74,14 @@ func (srh *SRH) receiveTCP(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	conn.Read(data)
+	n, err := conn.Read(data)
+	if err != nil {
+		return nil, err
+	}
 	if srh.replyToTCP == nil || !sameClient(srh.replyToTCP, &conn) {
 		srh.replyToTCP = &conn
 	}
-	return data, nil
+	return data[:n], nil
 }
 
 func (srh *SRH) receiveUDP(data []byte) ([]byte, error) {
