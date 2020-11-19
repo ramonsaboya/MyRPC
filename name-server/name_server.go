@@ -7,35 +7,23 @@ import (
 )
 
 type NameServer struct {
-	services map[string]map[string]commons.ClientProxy
+	services map[string]commons.ClientProxy
 }
 
-func (ns *NameServer) Register(name string, protocol string, proxy commons.ClientProxy) (bool, error) {
-	if ns.services[protocol] == nil {
-		ns.services[protocol] = map[string]commons.ClientProxy{}
-	}
-
-	ns.services[protocol][name] = proxy
+func (ns *NameServer) Register(name string, proxy commons.ClientProxy) (bool, error) {
+	ns.services[name] = proxy
 
 	return true, nil
 }
 
 func (ns *NameServer) Lookup(name string, protocol string) (commons.ClientProxy, error) {
-	if ns.services[protocol] == nil {
+	if reflect.ValueOf(ns.services[name]).IsNil() {
 		return commons.ClientProxy{}, nil
 	}
 
-	if reflect.ValueOf(ns.services[protocol][name]).IsNil() {
-		return commons.ClientProxy{}, nil
-	}
-
-	return ns.services[protocol][name], nil
+	return ns.services[name], nil
 }
 
 func (ns *NameServer) List(name string, protocol string) (map[string]commons.ClientProxy, error) {
-	if ns.services[protocol] == nil {
-		return map[string]commons.ClientProxy{}, nil
-	}
-
-	return ns.services[protocol], nil
+	return ns.services, nil
 }
