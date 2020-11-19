@@ -36,24 +36,3 @@ func (n *NameProxy) Register(proxy commons.ClientProxy) (*bool, error) {
 
 	return &reply, nil
 }
-
-func (n *NameProxy) Lookup(name string) (*commons.ClientProxy, error) {
-	req := client.Request{
-		Operation:   "Lookup",
-		ServiceName: "Calculator",
-	}
-
-	requestor, err := client.NewRequestor(&n.proxy)
-	if err != nil {
-		return nil, err
-	}
-	res, err := requestor.Invoke(req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	reply := res.(commons.ClientProxy)
-
-	return &reply, nil
-}

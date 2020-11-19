@@ -15,7 +15,7 @@ func Main() {
 		TypeName: "Calculator",
 	}
 
-	nameService, err := commons.NewNamingProxy(&proxy)
+	nameService, err := NewNamingProxy(&proxy)
 
 	if err != nil {
 		panic(err)
