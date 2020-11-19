@@ -3,19 +3,15 @@ package client
 import (
 	"fmt"
 
-	"github.com/ramonsaboya/myrpc/commons"
+	nameserver "github.com/ramonsaboya/myrpc/name-server"
 )
 
 func Main() {
-	proxy := commons.ClientProxy{
-		Host:     "localhost",
-		Port:     6666,
-		Protocol: commons.TCP,
-		ID:       1,
-		TypeName: "Calculator",
-	}
+	namingService := nameserver.NameServer{}
 
-	calculator, err := NewCalculatorProxy(&proxy)
+	calculatorProxy, _ := namingService.Lookup("Calculator")
+
+	calculator, err := NewCalculatorProxy(&calculatorProxy)
 	if err != nil {
 		panic(err)
 	}
