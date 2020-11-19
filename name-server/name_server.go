@@ -16,7 +16,7 @@ func (ns *NameServer) Register(name string, proxy commons.ClientProxy) (bool, er
 	return true, nil
 }
 
-func (ns *NameServer) Lookup(name string, protocol string) (commons.ClientProxy, error) {
+func (ns *NameServer) Lookup(name string) (commons.ClientProxy, error) {
 	if reflect.ValueOf(ns.services[name]).IsNil() {
 		return commons.ClientProxy{}, nil
 	}
@@ -24,6 +24,6 @@ func (ns *NameServer) Lookup(name string, protocol string) (commons.ClientProxy,
 	return ns.services[name], nil
 }
 
-func (ns *NameServer) List(name string, protocol string) (map[string]commons.ClientProxy, error) {
+func (ns *NameServer) List(name string) (map[string]commons.ClientProxy, error) {
 	return ns.services, nil
 }
