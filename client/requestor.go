@@ -5,7 +5,8 @@ import (
 )
 
 type Requestor struct {
-	proxy *commons.ClientProxy
+	proxy     *commons.ClientProxy
+	RequestId int
 }
 
 type Request struct {
@@ -15,7 +16,8 @@ type Request struct {
 
 func NewRequestor(proxy *commons.ClientProxy) (*Requestor, error) {
 	return &Requestor{
-		proxy: proxy,
+		proxy:     proxy,
+		RequestId: 0,
 	}, nil
 }
 
@@ -26,23 +28,24 @@ func (r *Requestor) Invoke(inv Request) (interface{}, error) {
 		return nil, err
 	}
 
-	msgToClientBytes, err := marshaller.Marshall(commons.TempPacket{
-		Operation: inv.Operation,
-		Params:    inv.Params,
-		Reply:     make([]interface{}, 0),
-	})
+	reqHeader := commons.RequestHeader{RequestId: r.RequestId, ObjectKey: 1, Operation: inv.Operation}
+	reqBody := commons.RequestBody{Body: inv.Params}
+	header := commons.Header{MessageType: commons.TEMPREQUEST}
+	body := commons.Body{ReqHeader: reqHeader, ReqBody: reqBody}
+	tempPacketRequest := commons.TempPacket{Hdr: header, Bd: body}
+
+	msgToClientBytes, err := marshaller.Marshall(tempPacketRequest)
 	if err != nil {
 		return nil, err
 	}
-
 	msgFromServerBytes, err := crh.SendReceive(msgToClientBytes)
 	if err != nil {
 		return nil, err
 	}
-	rawReply, err := marshaller.Unmarshall(msgFromServerBytes)
+	tempPacketReply, err := marshaller.Unmarshall(msgFromServerBytes)
 	if err != nil {
 		return nil, err
 	}
 
-	return rawReply.Reply, nil
+	return tempPacketReply.Bd.RepBody.OperationResult, nil
 }
