@@ -17,7 +17,7 @@ type Body struct {
 }
 
 type RequestHeader struct {
-	RequestId int
+	RequestId string
 	ObjectKey int
 	Operation string
 }
@@ -27,7 +27,7 @@ type RequestBody struct {
 }
 
 type ReplyHeader struct {
-	RequestId int
+	RequestId string
 	Status    int
 }
 

@@ -1,12 +1,14 @@
 package client
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/ramonsaboya/myrpc/commons"
 )
 
 type Requestor struct {
-	proxy     *commons.ClientProxy
-	RequestId int
+	proxy *commons.ClientProxy
 }
 
 type Request struct {
@@ -14,10 +16,22 @@ type Request struct {
 	Params    []interface{}
 }
 
+func randInt(min int, max int) int {
+	return min + rand.Intn(max-min)
+}
+
+func randomString(l int) string {
+	bytes := make([]byte, l)
+	for i := 0; i < l; i++ {
+		bytes[i] = byte(randInt(65, 90))
+	}
+	return string(bytes)
+}
+
 func NewRequestor(proxy *commons.ClientProxy) (*Requestor, error) {
+	rand.Seed(time.Now().UnixNano())
 	return &Requestor{
-		proxy:     proxy,
-		RequestId: 0,
+		proxy: proxy,
 	}, nil
 }
 
@@ -28,7 +42,8 @@ func (r *Requestor) Invoke(inv Request) (interface{}, error) {
 		return nil, err
 	}
 
-	reqHeader := commons.RequestHeader{RequestId: r.RequestId, ObjectKey: 1, Operation: inv.Operation}
+	requestId := randomString(32)
+	reqHeader := commons.RequestHeader{RequestId: requestId, ObjectKey: 1, Operation: inv.Operation}
 	reqBody := commons.RequestBody{Body: inv.Params}
 	header := commons.Header{MessageType: commons.TEMPREQUEST}
 	body := commons.Body{ReqHeader: reqHeader, ReqBody: reqBody}
