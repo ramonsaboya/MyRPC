@@ -10,7 +10,10 @@ type Requestor struct {
 
 type Request struct {
 	Operation string
-	Params    []interface{}
+
+	Params      []interface{}
+	Proxy       commons.ClientProxy
+	ServiceName string
 }
 
 func NewRequestor(proxy *commons.ClientProxy) (*Requestor, error) {
@@ -27,9 +30,11 @@ func (r *Requestor) Invoke(inv Request) (interface{}, error) {
 	}
 
 	msgToClientBytes, err := marshaller.Marshall(commons.TempPacket{
-		Operation: inv.Operation,
-		Params:    inv.Params,
-		Reply:     make([]interface{}, 0),
+		Operation:   inv.Operation,
+		Params:      inv.Params,
+		Reply:       make([]interface{}, 0),
+		Proxy:       inv.Proxy,
+		ServiceName: inv.ServiceName,
 	})
 	if err != nil {
 		return nil, err
