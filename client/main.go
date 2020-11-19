@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/ramonsaboya/myrpc/commons"
-	"github.com/ramonsaboya/myrpc/server"
 )
 
 func Main() {
@@ -16,7 +15,7 @@ func Main() {
 		TypeName: "Calculator",
 	}
 
-	nameService, err := server.NewNamingProxy(&proxy)
+	nameService, err := commons.NewNamingProxy(&proxy)
 
 	if err != nil {
 		panic(err)
