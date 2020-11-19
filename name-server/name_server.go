@@ -1,4 +1,4 @@
-package nameserver
+package name
 
 import (
 	"reflect"
