@@ -9,3 +9,5 @@ func Which() string {
 func main() {
 	fmt.Println("Hello, world.")
 }
+
+const MIOPREQUEST int = 1

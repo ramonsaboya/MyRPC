@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/ramonsaboya/myrpc/commons"
+	"github.com/ramonsaboya/myrpc/miop"
 )
 
 type CalculatorInvoker struct {
@@ -21,7 +22,7 @@ func (c *CalculatorInvoker) Invoke() error {
 	}
 	marshaller := commons.Marshaller{}
 	calculator := Calculator{}
-	res := commons.TempPacket{}
+	res := miop.Packet{}
 	var reply interface{}
 
 	for {
@@ -34,17 +35,22 @@ func (c *CalculatorInvoker) Invoke() error {
 		if err != nil {
 			return err
 		}
-		operation := req.Operation
+		operation := req.Bd.ReqHeader.Operation
 
 		switch operation {
 		case "EquationRoots":
-			_a := int(req.Params[0].(float64))
-			_b := int(req.Params[1].(float64))
-			_c := int(req.Params[2].(float64))
+			_a := int(req.Bd.ReqBody.Body[0].(float64))
+			_b := int(req.Bd.ReqBody.Body[1].(float64))
+			_c := int(req.Bd.ReqBody.Body[2].(float64))
 			reply = calculator.EquationRoots(_a, _b, _c)
 		}
 
-		res.Reply = reply
+		repHeader := miop.ReplyHeader{RequestId: req.Bd.ReqHeader.RequestId, Status: 200}
+		repBody := miop.ReplyBody{OperationResult: reply}
+		header := miop.Header{MessageType: commons.MIOPREQUEST}
+		body := miop.Body{RepHeader: repHeader, RepBody: repBody}
+		res = miop.Packet{Hdr: header, Bd: body}
+
 		msgToClientBytes, err := marshaller.Marshall(res)
 		if err != nil {
 			return err

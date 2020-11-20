@@ -1,7 +1,11 @@
 package client
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/ramonsaboya/myrpc/commons"
+	"github.com/ramonsaboya/myrpc/miop"
 )
 
 type Requestor struct {
@@ -13,7 +17,20 @@ type Request struct {
 	Params    []interface{}
 }
 
+func randInt(min int, max int) int {
+	return min + rand.Intn(max-min)
+}
+
+func randomString(l int) string {
+	bytes := make([]byte, l)
+	for i := 0; i < l; i++ {
+		bytes[i] = byte(randInt(65, 90))
+	}
+	return string(bytes)
+}
+
 func NewRequestor(proxy *commons.ClientProxy) (*Requestor, error) {
+	rand.Seed(time.Now().UnixNano())
 	return &Requestor{
 		proxy: proxy,
 	}, nil
@@ -26,23 +43,25 @@ func (r *Requestor) Invoke(inv Request) (interface{}, error) {
 		return nil, err
 	}
 
-	msgToClientBytes, err := marshaller.Marshall(commons.TempPacket{
-		Operation: inv.Operation,
-		Params:    inv.Params,
-		Reply:     make([]interface{}, 0),
-	})
+	requestId := randomString(32)
+	reqHeader := miop.RequestHeader{RequestId: requestId, ObjectKey: 1, Operation: inv.Operation}
+	reqBody := miop.RequestBody{Body: inv.Params}
+	header := miop.Header{MessageType: commons.MIOPREQUEST}
+	body := miop.Body{ReqHeader: reqHeader, ReqBody: reqBody}
+	packetRequest := miop.Packet{Hdr: header, Bd: body}
+
+	msgToClientBytes, err := marshaller.Marshall(packetRequest)
 	if err != nil {
 		return nil, err
 	}
-
 	msgFromServerBytes, err := crh.SendReceive(msgToClientBytes)
 	if err != nil {
 		return nil, err
 	}
-	rawReply, err := marshaller.Unmarshall(msgFromServerBytes)
+	packetReply, err := marshaller.Unmarshall(msgFromServerBytes)
 	if err != nil {
 		return nil, err
 	}
 
-	return rawReply.Reply, nil
+	return packetReply.Bd.RepBody.OperationResult, nil
 }
