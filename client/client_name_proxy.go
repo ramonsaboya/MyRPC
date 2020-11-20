@@ -1,7 +1,7 @@
-package server
+package client
 
 import (
-	"github.com/ramonsaboya/myrpc/client"
+	"github.com/mitchellh/mapstructure"
 	"github.com/ramonsaboya/myrpc/commons"
 )
 
@@ -16,12 +16,12 @@ func NewNamingProxy(proxyRef *commons.ClientProxy) (*NameProxy, error) {
 }
 
 func (n *NameProxy) Lookup(name string) (*commons.ClientProxy, error) {
-	req := client.Request{
+	req := Request{
 		Operation:   "Lookup",
 		ServiceName: "Calculator",
 	}
 
-	requestor, err := client.NewRequestor(&n.proxy)
+	requestor, err := NewRequestor(&n.proxy)
 	if err != nil {
 		return nil, err
 	}
@@ -30,8 +30,9 @@ func (n *NameProxy) Lookup(name string) (*commons.ClientProxy, error) {
 	if err != nil {
 		return nil, err
 	}
+	resMap := res.(map[string]interface{})
+	proxy := commons.ClientProxy{}
 
-	reply := res.(commons.ClientProxy)
-
-	return &reply, nil
+	mapstructure.Decode(resMap, &proxy)
+	return &proxy, nil
 }
