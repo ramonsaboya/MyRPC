@@ -1,6 +1,6 @@
-package commons
+package miop
 
-type TempPacket struct {
+type Packet struct {
 	Hdr Header
 	Bd  Body
 }

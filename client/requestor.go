@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ramonsaboya/myrpc/commons"
+	"github.com/ramonsaboya/myrpc/miop"
 )
 
 type Requestor struct {
@@ -43,13 +44,13 @@ func (r *Requestor) Invoke(inv Request) (interface{}, error) {
 	}
 
 	requestId := randomString(32)
-	reqHeader := commons.RequestHeader{RequestId: requestId, ObjectKey: 1, Operation: inv.Operation}
-	reqBody := commons.RequestBody{Body: inv.Params}
-	header := commons.Header{MessageType: commons.TEMPREQUEST}
-	body := commons.Body{ReqHeader: reqHeader, ReqBody: reqBody}
-	tempPacketRequest := commons.TempPacket{Hdr: header, Bd: body}
+	reqHeader := miop.RequestHeader{RequestId: requestId, ObjectKey: 1, Operation: inv.Operation}
+	reqBody := miop.RequestBody{Body: inv.Params}
+	header := miop.Header{MessageType: commons.MIOPREQUEST}
+	body := miop.Body{ReqHeader: reqHeader, ReqBody: reqBody}
+	packetRequest := miop.Packet{Hdr: header, Bd: body}
 
-	msgToClientBytes, err := marshaller.Marshall(tempPacketRequest)
+	msgToClientBytes, err := marshaller.Marshall(packetRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -57,10 +58,10 @@ func (r *Requestor) Invoke(inv Request) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	tempPacketReply, err := marshaller.Unmarshall(msgFromServerBytes)
+	packetReply, err := marshaller.Unmarshall(msgFromServerBytes)
 	if err != nil {
 		return nil, err
 	}
 
-	return tempPacketReply.Bd.RepBody.OperationResult, nil
+	return packetReply.Bd.RepBody.OperationResult, nil
 }

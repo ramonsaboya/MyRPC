@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/ramonsaboya/myrpc/commons"
+	"github.com/ramonsaboya/myrpc/miop"
 )
 
 type CalculatorInvoker struct {
@@ -21,7 +22,7 @@ func (c *CalculatorInvoker) Invoke() error {
 	}
 	marshaller := commons.Marshaller{}
 	calculator := Calculator{}
-	res := commons.TempPacket{}
+	res := miop.Packet{}
 	var reply interface{}
 
 	for {
@@ -44,11 +45,11 @@ func (c *CalculatorInvoker) Invoke() error {
 			reply = calculator.EquationRoots(_a, _b, _c)
 		}
 
-		repHeader := commons.ReplyHeader{RequestId: req.Bd.ReqHeader.RequestId, Status: 200}
-		repBody := commons.ReplyBody{OperationResult: reply}
-		header := commons.Header{MessageType: commons.TEMPREQUEST}
-		body := commons.Body{RepHeader: repHeader, RepBody: repBody}
-		res = commons.TempPacket{Hdr: header, Bd: body}
+		repHeader := miop.ReplyHeader{RequestId: req.Bd.ReqHeader.RequestId, Status: 200}
+		repBody := miop.ReplyBody{OperationResult: reply}
+		header := miop.Header{MessageType: commons.MIOPREQUEST}
+		body := miop.Body{RepHeader: repHeader, RepBody: repBody}
+		res = miop.Packet{Hdr: header, Bd: body}
 
 		msgToClientBytes, err := marshaller.Marshall(res)
 		if err != nil {

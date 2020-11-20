@@ -10,4 +10,4 @@ func main() {
 	fmt.Println("Hello, world.")
 }
 
-const TEMPREQUEST int = 1
+const MIOPREQUEST int = 1
