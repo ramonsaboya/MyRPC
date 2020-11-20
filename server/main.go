@@ -20,7 +20,7 @@ func Main() {
 	if err != nil {
 		panic(err)
 	}
-
+	proxy.Port = 6665
 	reg, err := nameService.Register(proxy)
 
 	if err != nil || *reg == false {
