@@ -1,6 +1,7 @@
 package client
 
 import (
+	"github.com/mitchellh/mapstructure"
 	"github.com/ramonsaboya/myrpc/commons"
 )
 
@@ -31,14 +32,9 @@ func (calculator *CalculatorProxy) EquationRoots(a, b, c int) (*commons.Equation
 	}
 
 	resMap := res.(map[string]interface{})
-	resArr := resMap["Roots"].([]interface{})
-	roots := make([]int, len(resArr))
-	for idx, x := range resArr {
-		roots[idx] = int(x.(float64))
-	}
-	rootsObj := commons.EquationRoots{
-		Roots: roots,
-	}
+	roots := commons.EquationRoots{}
 
-	return &rootsObj, nil
+	mapstructure.Decode(resMap, &roots)
+
+	return &roots, nil
 }

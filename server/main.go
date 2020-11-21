@@ -15,6 +15,18 @@ func Main() {
 		TypeName: "Calculator",
 	}
 
+	nameService, err := NewNamingProxy(&proxy)
+
+	if err != nil {
+		panic(err)
+	}
+	proxy.Port = 6665
+	reg, err := nameService.Register(proxy)
+
+	if err != nil || *reg == false {
+		panic("Failed to Register Calculator Service")
+	}
+
 	fmt.Println("Calculator server running!!")
 	calculatorInvoker := NewCalculatorInvoker(&proxy)
 	go calculatorInvoker.Invoke()

@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/ramonsaboya/myrpc/client"
+	"github.com/ramonsaboya/myrpc/name-server"
 	"github.com/ramonsaboya/myrpc/server"
 )
 
@@ -15,5 +16,7 @@ func main() {
 		client.Main()
 	case "server":
 		server.Main()
+	case "name":
+		name.Main()
 	}
 }
