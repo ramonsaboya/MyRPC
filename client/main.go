@@ -2,15 +2,19 @@ package client
 
 import (
 	"fmt"
+	"math"
+	"time"
 
 	"github.com/ramonsaboya/myrpc/commons"
 )
 
-func Main() {
+var iterations = 10000
+
+func Main(protocol commons.Protocol, benchmark bool) {
 	proxy := commons.ClientProxy{
 		Host:     "localhost",
 		Port:     6666,
-		Protocol: commons.TCP,
+		Protocol: protocol,
 		ID:       1,
 		TypeName: "Calculator",
 	}
@@ -33,10 +37,36 @@ func Main() {
 		panic(err)
 	}
 
-	roots, err := calculator.EquationRoots(2, 4, -6)
-
-	if err != nil {
-		panic(err)
+	if benchmark {
+		var sum int64 = 0
+		iterationTime := make([]int64, iterations)
+		for i := 0; i < iterations; i++ {
+			startTime := time.Now()
+			_, err := calculator.EquationRoots(2, 4, -6)
+			totalTime := time.Now().Sub(startTime).Microseconds()
+			fmt.Println(totalTime)
+			sum += totalTime
+			iterationTime[i] = totalTime
+			if err != nil {
+				panic(err)
+			}
+		}
+		var variation float64 = 0
+		mean := float64(sum) / float64(iterations)
+		for _, time := range iterationTime {
+			diff := float64(time) - mean
+			variation += diff * diff
+		}
+		variation /= float64(iterations)
+		sd := math.Sqrt(variation)
+		fmt.Println(mean)
+		fmt.Println(sd)
+	} else {
+		for i := 0; i < iterations; i++ {
+			_, err := calculator.EquationRoots(2, 4, -6)
+			if err != nil {
+				panic(err)
+			}
+		}
 	}
-	fmt.Printf("roots are %v\n", roots.Roots)
 }
