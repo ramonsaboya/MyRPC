@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"math"
+	"sync"
 	"time"
 
 	"github.com/ramonsaboya/myrpc/commons"
@@ -10,7 +11,7 @@ import (
 
 var iterations = 10000
 
-func Main(protocol commons.Protocol, benchmark bool) {
+func Main(protocol commons.Protocol, benchmark bool, wg sync.WaitGroup) {
 	proxy := commons.ClientProxy{
 		Host:     "localhost",
 		Port:     6666,
@@ -38,12 +39,14 @@ func Main(protocol commons.Protocol, benchmark bool) {
 	}
 
 	if benchmark {
+		fmt.Println("benchmark")
 		var sum int64 = 0
 		iterationTime := make([]int64, iterations)
 		for i := 0; i < iterations; i++ {
 			startTime := time.Now()
-			_, err := calculator.EquationRoots(2, 4, -6)
+			root, err := calculator.EquationRoots(2, 4, -6)
 			totalTime := time.Now().Sub(startTime).Microseconds()
+			fmt.Println(root)
 			fmt.Println(totalTime)
 			sum += totalTime
 			iterationTime[i] = totalTime
@@ -61,6 +64,7 @@ func Main(protocol commons.Protocol, benchmark bool) {
 		sd := math.Sqrt(variation)
 		fmt.Println(mean)
 		fmt.Println(sd)
+		wg.Done()
 	} else {
 		for i := 0; i < iterations; i++ {
 			_, err := calculator.EquationRoots(2, 4, -6)
@@ -69,4 +73,5 @@ func Main(protocol commons.Protocol, benchmark bool) {
 			}
 		}
 	}
+	// fmt.Printf("roots are %v\n", roots.Roots)
 }

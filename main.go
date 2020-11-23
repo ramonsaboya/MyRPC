@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/ramonsaboya/myrpc/commons"
 
@@ -12,6 +13,7 @@ import (
 )
 
 var ClientAmounts = []int{1, 2, 5, 10}
+var wg sync.WaitGroup
 
 func main() {
 	service := os.Args[1]
@@ -28,13 +30,14 @@ func main() {
 		for _, clientAmount := range ClientAmounts {
 			fmt.Println("###############")
 			fmt.Println(clientAmount)
-			go client.Main(_protocol, true)
+			wg.Add(1)
+			go client.Main(_protocol, true, wg)
 			for i := 0; i < clientAmount-1; i++ {
-				go client.Main(_protocol, false)
+				go client.Main(_protocol, false, wg)
 			}
+			wg.Wait()
 			fmt.Println("###############")
 		}
-		fmt.Scanln()
 	case "server":
 		server.Main(_protocol)
 	case "name":
