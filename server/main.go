@@ -28,7 +28,7 @@ func Main() {
 	}
 
 	fmt.Println("Calculator server running!!")
-	calculatorInvoker := NewCalculatorInvoker(&proxy)
+	calculatorInvoker := NewCalculatorInvoker(&proxy, 3)
 	go calculatorInvoker.Invoke()
 
 	fmt.Scanln()
