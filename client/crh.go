@@ -47,7 +47,8 @@ func (crh *CRH) getConnection() (*net.Conn, error) {
 }
 
 func (crh *CRH) SendReceive(data []byte) ([]byte, error) {
-	conn, err := crh.getConnection()
+	// conn, err := crh.getConnection()
+	conn, err := createConnection(crh.protocol, crh.address)
 	if err != nil {
 		return nil, err
 	}
