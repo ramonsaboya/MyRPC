@@ -99,6 +99,7 @@ func (srh *SRH) sendTCP(data []byte) error {
 		return errReplyToNotSet
 	}
 	_, err := (*srh.replyToTCP).Write(data)
+	(*srh.replyToTCP).Close()
 	if err != nil {
 		return err
 	}
