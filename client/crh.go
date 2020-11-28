@@ -60,6 +60,7 @@ func (crh *CRH) SendReceive(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	(*conn).Close()
 
 	return buf[:n], nil
 }

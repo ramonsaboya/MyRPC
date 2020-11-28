@@ -11,7 +11,7 @@ import (
 
 var iterations = 10000
 
-func Main(protocol commons.Protocol, benchmark bool, wg sync.WaitGroup) {
+func Main(protocol commons.Protocol, benchmark bool, wg *sync.WaitGroup) {
 	proxy := commons.ClientProxy{
 		Host:     "localhost",
 		Port:     6666,
@@ -39,20 +39,18 @@ func Main(protocol commons.Protocol, benchmark bool, wg sync.WaitGroup) {
 	}
 
 	if benchmark {
-		fmt.Println("benchmark")
 		var sum int64 = 0
 		iterationTime := make([]int64, iterations)
 		for i := 0; i < iterations; i++ {
 			startTime := time.Now()
-			root, err := calculator.EquationRoots(2, 4, -6)
+			_, err := calculator.EquationRoots(2, 4, -6)
 			totalTime := time.Now().Sub(startTime).Microseconds()
-			fmt.Println(root)
-			fmt.Println(totalTime)
 			sum += totalTime
 			iterationTime[i] = totalTime
 			if err != nil {
 				panic(err)
 			}
+			time.Sleep(time.Second / 100)
 		}
 		var variation float64 = 0
 		mean := float64(sum) / float64(iterations)

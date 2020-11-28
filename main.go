@@ -12,12 +12,11 @@ import (
 	"github.com/ramonsaboya/myrpc/server"
 )
 
-var ClientAmounts = []int{1, 2, 5, 10}
-var wg sync.WaitGroup
-
 func main() {
 	service := os.Args[1]
 	protocol := os.Args[2]
+	var ClientAmounts = []int{1, 2, 5, 10}
+	var wg sync.WaitGroup
 	var _protocol commons.Protocol
 	if protocol == "tcp" {
 		_protocol = commons.TCP
@@ -31,9 +30,9 @@ func main() {
 			fmt.Println("###############")
 			fmt.Println(clientAmount)
 			wg.Add(1)
-			go client.Main(_protocol, true, wg)
+			go client.Main(_protocol, true, &wg)
 			for i := 0; i < clientAmount-1; i++ {
-				go client.Main(_protocol, false, wg)
+				go client.Main(_protocol, false, &wg)
 			}
 			wg.Wait()
 			fmt.Println("###############")
