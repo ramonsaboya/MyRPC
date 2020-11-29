@@ -6,7 +6,10 @@ import (
 	"github.com/ramonsaboya/myrpc/commons"
 )
 
-type Calculator struct{}
+type Calculator struct {
+	id        string
+	available bool
+}
 
 func (Calculator) EquationRoots(a, b, c int) commons.EquationRoots {
 	delta := delta(a, b, c)
